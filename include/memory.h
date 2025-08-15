@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 extern uint8_t memory[0x10000];
+void tick_dma(int cycles);
 void init_memory();
 uint8_t read_byte(uint16_t addr);
 void write_byte(uint16_t addr, uint8_t data);
