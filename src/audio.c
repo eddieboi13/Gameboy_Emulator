@@ -3,6 +3,8 @@
 #include "memory.h"
 
 const float CPU_CYCLES_PER_SAMPLE = 4194304.0f / 44100.0f; //(cpu_cycles/s)/(samples/s)
+const int FRAME_SEQUENCER_RATE = 4194304 / 512; //(cpu_cycles/s)/(frame seqeuncer cycles/s)
+
 static const uint8_t DUTY_PATTERNS[4][8] = {
     {0, 0, 0, 0, 0, 0, 0, 1}, // 12.5%
     {1, 0, 0, 0, 0, 0, 0, 1}, // 25%
@@ -10,6 +12,13 @@ static const uint8_t DUTY_PATTERNS[4][8] = {
     {0, 1, 1, 1, 1, 1, 1, 0}  // 75%
 };
 
+void static inline generate_audio_ticks(){
+	
+}
+void update_audio(uint8_t cycles){
+	apu.frame_sequence_counter += cycles;
+
+}
 void audio_callback(void* userdata, uint8_t* stream, int len) {
     int16_t* buffer = (int16_t*)stream;
     int num_samples = len / sizeof(int16_t);
