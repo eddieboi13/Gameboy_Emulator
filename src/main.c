@@ -73,6 +73,7 @@ int main(int argc, char **argv) {
                 int interrupt_cycles = 20;
                 update_timers(&timer, interrupt_cycles);
                 update_ppu(interrupt_cycles);
+				update_audio(interrupt_cycles);
                 cycles_this_frame += interrupt_cycles;
                 continue;
             }
@@ -81,6 +82,7 @@ int main(int argc, char **argv) {
                 int halt_cycles = 4;
                 update_timers(&timer, halt_cycles);
                 update_ppu(halt_cycles);
+				update_audio(halt_cycles);
                 cycles_this_frame += halt_cycles;
                 continue;
             }
@@ -90,6 +92,7 @@ int main(int argc, char **argv) {
 
             update_timers(&timer, cycles_executed);
             update_ppu(cycles_executed);
+			update_audio(cycles_executed);
             cycles_this_frame += cycles_executed;
             
             if(registers.ime_delay){
