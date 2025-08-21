@@ -40,10 +40,11 @@ int main(int argc, char **argv) {
 	want.freq = 44100; 
 	want.format = AUDIO_S16SYS; 
 	want.channels = 1; 
-	want.samples = 2048; 
+	want.samples = 512; 
 	want.callback = audio_callback; 
 	want.userdata = NULL; 
 	SDL_AudioDeviceID device = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
+	audio_set_sample_rate(have.freq);
 	SDL_PauseAudioDevice(device, 0);
 
 
@@ -73,6 +74,7 @@ int main(int argc, char **argv) {
                 int interrupt_cycles = 20;
                 update_timers(&timer, interrupt_cycles);
                 update_ppu(interrupt_cycles);
+				update_audio(interrupt_cycles);
                 cycles_this_frame += interrupt_cycles;
                 continue;
             }
@@ -81,6 +83,7 @@ int main(int argc, char **argv) {
                 int halt_cycles = 4;
                 update_timers(&timer, halt_cycles);
                 update_ppu(halt_cycles);
+				update_audio(halt_cycles);
                 cycles_this_frame += halt_cycles;
                 continue;
             }
@@ -90,6 +93,7 @@ int main(int argc, char **argv) {
 
             update_timers(&timer, cycles_executed);
             update_ppu(cycles_executed);
+			update_audio(cycles_executed);
             cycles_this_frame += cycles_executed;
             
             if(registers.ime_delay){
@@ -109,7 +113,9 @@ int main(int argc, char **argv) {
 
     }
 
-    SDL_DestroyTexture(texture);
+    SDL_PauseAudioDevice(device, 1);
+	SDL_CloseAudioDevice(device);
+	SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
