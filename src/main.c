@@ -40,10 +40,11 @@ int main(int argc, char **argv) {
 	want.freq = 44100; 
 	want.format = AUDIO_S16SYS; 
 	want.channels = 1; 
-	want.samples = 2048; 
+	want.samples = 512; 
 	want.callback = audio_callback; 
 	want.userdata = NULL; 
 	SDL_AudioDeviceID device = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
+	audio_set_sample_rate(have.freq);
 	SDL_PauseAudioDevice(device, 0);
 
 
@@ -112,7 +113,9 @@ int main(int argc, char **argv) {
 
     }
 
-    SDL_DestroyTexture(texture);
+    SDL_PauseAudioDevice(device, 1);
+	SDL_CloseAudioDevice(device);
+	SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

@@ -183,13 +183,21 @@ void write_byte(uint16_t addr, uint8_t value) {
             return;
         }
 
-        if(addr == C1_HIGH_REGISTER){
-            memory[addr] = value;
-            if(value & 0x80) {
-                apu.ch1_triggered = true;
-            }
-            return;
-        }
+        if (addr == C1_HIGH_REGISTER && (value & 0x80)) {
+        apu.ch1_triggered = true;
+    }
+    // Channel 2 Trigger (NR24)
+    if (addr == C2_HIGH_REGISTER && (value & 0x80)) {
+        apu.ch2_triggered = true;
+    }
+    // Channel 3 Trigger (NR34)
+    if (addr == C3_HIGH_REGISTER && (value & 0x80)) {
+        apu.ch3_triggered = true;
+    }
+    // Channel 4 Trigger (NR44)
+    if (addr == C4_CONTROL_REGISTER && (value & 0x80)) {
+        apu.ch4_triggered = true;
+    }
 
 		if(addr == STAT_REGISTER) {
             uint8_t hw_low = memory[addr] & 0x07;        // mode + coincidence bit are HW maintained
