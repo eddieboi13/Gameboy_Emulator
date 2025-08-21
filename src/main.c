@@ -14,6 +14,7 @@
 Registers registers = {0};
 Timer timer = {0};
 extern JoypadState joypad;
+extern uint8_t mbc_type;
 
 const int CYCLES_PER_FRAME = 70224;  // Total T-cycles for one full frame refresh
 const float FRAME_DURATION = 1000.0f / 59.7f; // Target time per frame in milliseconds (~16.7ms)
@@ -26,7 +27,7 @@ int main(int argc, char **argv) {
 
     init_memory();
     load_rom(argv[1]);
-      
+    mbc_type = memory[0x147];  
     cpu_init(&registers);
     ppu_init();
 

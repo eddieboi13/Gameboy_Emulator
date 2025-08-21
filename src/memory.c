@@ -6,6 +6,10 @@
 #include "audio.h"
 
 uint8_t memory[0x10000];
+uint8_t *full_rom = NULL;
+long rom_size = 0;
+uint8_t mbc_type = 0;
+uint8_t current_rom_bank = 1;
 extern Registers registers;
 extern JoypadState joypad;
 extern uint8_t ppu_mode; // 0=HBlank,1=VBlank,2=OAM,3=VRAM
@@ -55,27 +59,41 @@ void init_memory() {
     memory[IE_REGISTER] = 0x00; 
 }
 
-size_t load_rom(const char *path){
+size_t load_rom(const char *path) {
     FILE *f = fopen(path, "rb");
     if (!f) {
         fprintf(stderr, "Failed to open ROM file: %s\n", path);
         exit(1);
     }
-
-    size_t bytes_read = fread(memory, 1, 0x8000, f);
-    if (bytes_read == 0) {
-        fprintf(stderr, "Failed to read ROM\n");
+    fseek(f, 0, SEEK_END);
+    rom_size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    full_rom = malloc(rom_size);
+    if (!full_rom) {
+        fprintf(stderr, "Failed to allocate memory for ROM\n");
         exit(1);
     }
+    size_t bytes_read = fread(full_rom, 1, rom_size, f);
+    if (bytes_read != rom_size) {
+        fprintf(stderr, "Failed to read full ROM\n");
+        exit(1);
+    }
+    memcpy(memory, full_rom, 0x4000);
+    memcpy(&memory[0x4000], &full_rom[0x4000], 0x4000);
 
     fclose(f);
-    printf("ROM loaded: %zu bytes\n", bytes_read);
+    printf("ROM loaded: %ld bytes\n", rom_size);
     return bytes_read;
 }
 
 uint8_t read_byte(uint16_t addr){
-    // ROM
-    if(addr <= 0x7FFF) return memory[addr];
+    if (addr >= 0x4000 && addr <= 0x7FFF) {
+    	if(mbc_type >= 1){
+        	uint32_t offset = (current_rom_bank * 0x4000) + (addr - 0x4000);
+	        return full_rom[offset];
+    	}
+	}
+	if(addr <= 0x7FFF) return memory[addr];
     
 	// VRAM (blocked in Mode 3)
     else if(addr >= 0x8000 && addr <= 0x9FFF){
@@ -137,8 +155,21 @@ uint8_t read_byte(uint16_t addr){
 
 void write_byte(uint16_t addr, uint8_t value) {
     static bool first_serial = true;
-    // ROM (ignore writes)
-    if(addr <= 0x7FFF) return;
+    if(addr >= 0x0000 && addr <= 0x1FFF && mbc_type == 0x01){
+		//TODO (enable cartridge ram)
+	}
+	if(addr >= 0x2000 && addr <= 0x3FFF){
+    	if(mbc_type == 1 || mbc_type == 2 || mbc_type == 3){
+        	uint8_t bank = value & 0x1F;
+	        if(bank == 0){
+            	bank = 1;
+        	}
+        	current_rom_bank = (current_rom_bank & 0xE0) | bank;
+    	    return;
+	    }
+	}	
+	if(addr >= 0x4000 && addr <= 0x5FFF && mbc_type == 0x01) current_rom_bank |= (value & 0xC0);
+	if(addr <= 0x7FFF) return;
 
     // VRAM (blocked in Mode 3)
     else if(addr >= 0x8000 && addr <= 0x9FFF) {
