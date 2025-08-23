@@ -10,6 +10,7 @@ uint8_t *full_rom = NULL;
 long rom_size = 0;
 uint8_t mbc_type = 0;
 uint8_t current_rom_bank = 1;
+bool ram_enabled = false;
 extern Registers registers;
 extern JoypadState joypad;
 extern uint8_t ppu_mode; // 0=HBlank,1=VBlank,2=OAM,3=VRAM
@@ -156,16 +157,32 @@ uint8_t read_byte(uint16_t addr){
 void write_byte(uint16_t addr, uint8_t value) {
     static bool first_serial = true;
     if(addr >= 0x0000 && addr <= 0x1FFF){
-		if(mbc_type == 1){
-
-		}
+		if(mbc_type == 1 || mbc_type == 2 || mbc_type == 3){
+       		if ((value & 0x0F) == 0x0A){
+         		ram_enabled = true;
+	        } 
+			else{
+            	ram_enabled = false;
+            }
+        }
 		if(mbc_type == 5 || mbc_type == 6){
-
+			if((addr & 0x0100) == 0){
+         		if((value & 0x0F) == 0x0A){
+          	    	ram_enabled = true;
+	            } 
+				else{
+                	ram_enabled = false;
+            	}
+        	}
 		}
 		if(mbc_type >= 0x0F && mbc_type <= 0x13){
-		
-		}
-		//TODO (enable cartridge ram)
+        	if ((value & 0x0F) == 0x0A){
+    	        ram_enabled = true;
+            } 
+            else{                    
+				ram_enabled = false;
+            }
+        }
 	}
 	if(addr >= 0x2000 && addr <= 0x3FFF){
     	if(mbc_type == 1 || mbc_type == 2 || mbc_type == 3){
@@ -205,7 +222,7 @@ void write_byte(uint16_t addr, uint8_t value) {
     }
 
     // External RAM
-    else if(addr >= 0xA000 && addr <= 0xBFFF) memory[addr] = value;
+    else if(addr >= 0xA000 && addr <= 0xBFFF && ram_enabled) memory[addr] = value;
 
     // WRAM
     else if(addr >= 0xC000 && addr <= 0xDFFF) memory[addr] = value;
