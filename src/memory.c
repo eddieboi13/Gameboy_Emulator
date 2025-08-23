@@ -51,7 +51,7 @@ void init_memory() {
     memory[SCY_REGISTER] = 0x00;
     memory[SCX_REGISTER] = 0x00;
     memory[LYC_REGISTER] = 0x00; 
-    memory[BGP_REGISTER] = 0xE4;
+    memory[BGP_REGISTER] = 0xFC;
     memory[OGP_REGISTER] = 0xFF;
     memory[OGBP1_REGISTER] = 0xFF;
     memory[WY_REGISTER] = 0x00;
@@ -87,7 +87,7 @@ size_t load_rom(const char *path) {
 }
 
 uint8_t read_byte(uint16_t addr){
-    if (addr >= 0x4000 && addr <= 0x7FFF) {
+    if(addr >= 0x4000 && addr <= 0x7FFF){
     	if(mbc_type >= 1){
         	uint32_t offset = (current_rom_bank * 0x4000) + (addr - 0x4000);
 	        return full_rom[offset];
@@ -155,7 +155,16 @@ uint8_t read_byte(uint16_t addr){
 
 void write_byte(uint16_t addr, uint8_t value) {
     static bool first_serial = true;
-    if(addr >= 0x0000 && addr <= 0x1FFF && mbc_type == 0x01){
+    if(addr >= 0x0000 && addr <= 0x1FFF){
+		if(mbc_type == 1){
+
+		}
+		if(mbc_type == 5 || mbc_type == 6){
+
+		}
+		if(mbc_type >= 0x0F && mbc_type <= 0x13){
+		
+		}
 		//TODO (enable cartridge ram)
 	}
 	if(addr >= 0x2000 && addr <= 0x3FFF){
@@ -167,6 +176,22 @@ void write_byte(uint16_t addr, uint8_t value) {
         	current_rom_bank = (current_rom_bank & 0xE0) | bank;
     	    return;
 	    }
+		if(mbc_type == 5 || mbc_type == 6){
+			if((addr & 0x0100) != 0){
+				uint8_t bank = value & 0x0F;
+            	if(bank == 0){
+                	bank = 1;
+	            }
+				current_rom_bank = bank;
+			}
+		}
+		if(mbc_type >= 0x0F && mbc_type <= 0x13){
+			uint8_t bank = value & 0x7F;
+                if(bank == 0){
+                    bank = 1;
+                }
+                current_rom_bank = bank;
+		}
 	}	
 	if(addr >= 0x4000 && addr <= 0x5FFF && mbc_type == 0x01) current_rom_bank |= (value & 0xC0);
 	if(addr <= 0x7FFF) return;
