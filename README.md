@@ -32,6 +32,8 @@ Note: the Emulator actually fails the tests for instructions 46, 4E, 56, 5E, 66,
 
 ### Games
 <img width="637" height="597" alt="Screenshot 2025-08-24 at 11 36 19 PM" src="https://github.com/user-attachments/assets/3f314744-7258-41b9-a373-1fa8d166a7ed" />
+<img width="642" height="601" alt="Screenshot 2025-08-24 at 11 46 03 PM" src="https://github.com/user-attachments/assets/c2509de3-2c37-4aa7-9d85-11121bc32de9" />
+
 
 ---
 
@@ -45,3 +47,10 @@ Note: the Emulator actually fails the tests for instructions 46, 4E, 56, 5E, 66,
 ```bash
 make
 ./gameboy Path/To/Rom_File
+```
+
+## ⚖️ Disclaimer
+
+This project is an independent, non-commercial Game Boy emulator created purely for educational purposes.  
+- You must provide your own legally obtained Game Boy ROMs to use with the emulator.  
+- The author is not affiliated with, endorsed by, or in any way connected to Nintendo Co., Ltd.
